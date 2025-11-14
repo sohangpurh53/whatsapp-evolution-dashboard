@@ -10,6 +10,7 @@ import { SendButtonForm } from "@/components/forms/SendButtonForm";
 import { SendStickerForm } from "@/components/forms/SendStickerForm";
 import { SendReactionForm } from "@/components/forms/SendReactionForm";
 import { SendStatusForm } from "@/components/forms/SendStatusForm";
+import { BulkSendTextForm } from "@/components/forms/BulkSendTextForm";
 
 interface SendMessageSectionProps {
   config: {
@@ -28,8 +29,9 @@ export const SendMessageSection = ({ config }: SendMessageSectionProps) => {
       </div>
 
       <Tabs defaultValue="text" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10">
+        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-11">
           <TabsTrigger value="text">Text</TabsTrigger>
+          <TabsTrigger value="bulk-text">VCF Text (Bulk Messages) </TabsTrigger>
           <TabsTrigger value="media">Media</TabsTrigger>
           <TabsTrigger value="location">Location</TabsTrigger>
           <TabsTrigger value="contact">Contact</TabsTrigger>
@@ -79,6 +81,10 @@ export const SendMessageSection = ({ config }: SendMessageSectionProps) => {
 
         <TabsContent value="status">
           <SendStatusForm config={config} />
+        </TabsContent>
+
+        <TabsContent value="bulk-text">
+          <BulkSendTextForm config={config} />
         </TabsContent>
       </Tabs>
     </div>
