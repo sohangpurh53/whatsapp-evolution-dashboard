@@ -11,6 +11,7 @@ import { SendStickerForm } from "@/components/forms/SendStickerForm";
 import { SendReactionForm } from "@/components/forms/SendReactionForm";
 import { SendStatusForm } from "@/components/forms/SendStatusForm";
 import { BulkSendTextForm } from "@/components/forms/BulkSendTextForm";
+import { BulkSendMediaForm } from "@/components/forms/BulkSendMediaForm";
 
 interface SendMessageSectionProps {
   config: {
@@ -29,10 +30,11 @@ export const SendMessageSection = ({ config }: SendMessageSectionProps) => {
       </div>
 
       <Tabs defaultValue="text" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-11">
+        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-12">
           <TabsTrigger value="text">Text</TabsTrigger>
           <TabsTrigger value="bulk-text">Bulk Messages </TabsTrigger>
           <TabsTrigger value="media">Media</TabsTrigger>
+          <TabsTrigger value="bulk-media">Bulk Media</TabsTrigger>
           <TabsTrigger value="location">Location</TabsTrigger>
           <TabsTrigger value="contact">Contact</TabsTrigger>
           <TabsTrigger value="poll">Poll</TabsTrigger>
@@ -85,6 +87,9 @@ export const SendMessageSection = ({ config }: SendMessageSectionProps) => {
 
         <TabsContent value="bulk-text">
           <BulkSendTextForm config={config} />
+        </TabsContent>
+        <TabsContent value="bulk-media">
+          <BulkSendMediaForm config={config} />
         </TabsContent>
       </Tabs>
     </div>

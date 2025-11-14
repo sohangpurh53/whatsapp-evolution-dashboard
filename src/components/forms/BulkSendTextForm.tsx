@@ -25,6 +25,10 @@ export const BulkSendTextForm = ({ config }: BulkSendTextFormProps) => {
     () => Object.keys(selected).filter((n) => selected[n]),
     [selected]
   );
+  const normalizePhoneImported = (tel: string) => {
+    let num = tel.replace(/[^\d]/g, "").replace(/^0+/, "");
+    return num.startsWith("91") ? num : "91" + num;
+  };
 
   useEffect(() => {
     if (!contacts.length) return;
@@ -67,7 +71,7 @@ export const BulkSendTextForm = ({ config }: BulkSendTextFormProps) => {
     const toSend = selectedNumbers;
     const results: Array<{ number: string; ok: boolean; data?: any; error?: any }> = [];
     for (const number of toSend) {
-      const indianNum = `91${number}`
+      const indianNum = normalizePhoneImported(number)
       try {
         const res = await fetch(
           `${config.baseUrl}/message/sendText/${config.instance}`,
