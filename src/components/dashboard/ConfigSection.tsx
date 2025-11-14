@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Save, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 interface ConfigSectionProps {
   config: {
@@ -16,12 +17,54 @@ interface ConfigSectionProps {
 
 export const ConfigSection = ({ config, setConfig }: ConfigSectionProps) => {
   const { toast } = useToast();
+  const STORAGE_KEY = "evoapi_config";
 
-  const handleSave = () => {
-    toast({
-      title: "Configuration saved",
-      description: "Your API settings have been updated successfully.",
-    });
+  const toB64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes));
+  const fromB64 = (b64: string) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  const getKey = async () => {
+    let stored = localStorage.getItem("evoapi_config_key");
+    if (!stored) {
+      const raw = crypto.getRandomValues(new Uint8Array(32));
+      stored = toB64(raw);
+      localStorage.setItem("evoapi_config_key", stored);
+    }
+    const keyBytes = fromB64(stored);
+    return crypto.subtle.importKey("raw", keyBytes, "AES-GCM", false, ["encrypt", "decrypt"]);
+  };
+  const encryptText = async (text: string) => {
+    const key = await getKey();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const data = new TextEncoder().encode(text);
+    const cipher = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, data);
+    return { iv: toB64(iv), data: toB64(new Uint8Array(cipher)) };
+  };
+  const decryptText = async (payload: { iv: string; data: string }) => {
+    const key = await getKey();
+    const iv = fromB64(payload.iv);
+    const data = fromB64(payload.data);
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
+    return new TextDecoder().decode(plain);
+  };
+
+  useEffect(() => {
+    const load = async () => {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          const text = await decryptText(parsed);
+          const obj = JSON.parse(text);
+          setConfig(obj);
+        } catch {}
+      }
+    };
+    load();
+  }, [setConfig]);
+
+  const handleSave = async () => {
+    const payload = await encryptText(JSON.stringify(config));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    toast({ title: "Configuration saved", description: "Your API settings have been updated securely." });
   };
 
   return (
@@ -46,9 +89,14 @@ export const ConfigSection = ({ config, setConfig }: ConfigSectionProps) => {
             <Label htmlFor="baseUrl">Base URL</Label>
             <Input
               id="baseUrl"
+              type="password"
+              autoComplete="off"
               placeholder="https://api.evoapicloud.com"
               value={config.baseUrl}
               onChange={(e) => setConfig({ ...config, baseUrl: e.target.value })}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSave();
+              }}
             />
           </div>
 
@@ -56,9 +104,14 @@ export const ConfigSection = ({ config, setConfig }: ConfigSectionProps) => {
             <Label htmlFor="instance">Instance ID</Label>
             <Input
               id="instance"
+              type="password"
+              autoComplete="off"
               placeholder="your-instance-id"
               value={config.instance}
               onChange={(e) => setConfig({ ...config, instance: e.target.value })}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSave();
+              }}
             />
           </div>
 
@@ -67,9 +120,13 @@ export const ConfigSection = ({ config, setConfig }: ConfigSectionProps) => {
             <Input
               id="apiKey"
               type="password"
+              autoComplete="off"
               placeholder="your-api-key"
               value={config.apiKey}
               onChange={(e) => setConfig({ ...config, apiKey: e.target.value })}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSave();
+              }}
             />
           </div>
 
