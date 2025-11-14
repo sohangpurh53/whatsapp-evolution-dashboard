@@ -36,12 +36,27 @@ export const ApiFormBase = ({ title, description, children, onSubmit, config }: 
     }
 
     setLoading(true);
+    setResponse(null);
     try {
       const result = await onSubmit();
       setResponse(result);
+      const isError = !!(
+        result &&
+        typeof result === "object" &&
+        (("error" in result && result.error) ||
+          ("success" in result && result.success === false) ||
+          ("status" in result && result.status === "error"))
+      );
+      const description =
+        result && typeof result === "object" && "message" in result && typeof (result as any).message === "string"
+          ? (result as any).message
+          : isError
+          ? "API request failed"
+          : "API request completed successfully";
       toast({
-        title: "Request successful",
-        description: "API request completed successfully",
+        title: isError ? "Request failed" : "Request successful",
+        description,
+        variant: isError ? "destructive" : "success",
       });
     } catch (error: any) {
       toast({
