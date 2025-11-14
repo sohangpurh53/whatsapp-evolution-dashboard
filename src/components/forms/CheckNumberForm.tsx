@@ -62,10 +62,10 @@ export const CheckNumberForm = ({ config }: CheckNumberFormProps) => {
     //   .map((n) => n.trim())
     //   .filter(Boolean);
 
-    const numberArray = numbers
+    const numberArray = numbers?.length>0 ? numbers
       .split("\n")
       .map((n) => normalizePhoneImported(n.trim()))
-      .filter(Boolean);
+      .filter(Boolean):[]
     const selectedNumbersArray = selectedNumbers.map((p) => normalizePhoneImported(p.trim()))
     const union = Array.from(new Set([...numberArray, ...selectedNumbersArray]));
 
