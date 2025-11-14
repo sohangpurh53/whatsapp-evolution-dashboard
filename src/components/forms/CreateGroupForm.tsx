@@ -24,7 +24,10 @@ export const CreateGroupForm = ({ config }: CreateGroupFormProps) => {
   const [fileName, setFileName] = useState<string>("");
 
   const normalizePhone = (tel: string) => tel.replace(/[^\d]/g, "");
-
+const normalizePhoneImported = (tel: string) => {
+  let num = tel.replace(/[^\d]/g, "").replace(/^0+/, ""); 
+  return num.startsWith("91") ? num : "91" + num;
+};
   const selectedNumbers = useMemo(
     () => Object.keys(selected).filter((n) => selected[n]),
     [selected]
@@ -33,9 +36,12 @@ export const CreateGroupForm = ({ config }: CreateGroupFormProps) => {
   const handleSubmit = async () => {
     const participantArray = participants
       .split(/[\n,;]+/)
-      .map((p) => normalizePhone(p.trim()))
+      .map((p) => normalizePhoneImported(p.trim()))
       .filter(Boolean);
-    const union = Array.from(new Set([...participantArray, ...selectedNumbers]));
+      const selectedNumbersArray =  selectedNumbers.map((p) => normalizePhoneImported(p.trim()))
+    const union = Array.from(new Set([...participantArray, ...selectedNumbersArray]));
+
+
       
     const response = await fetch(
       `${config.baseUrl}/group/create/${config.instance}`,
