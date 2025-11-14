@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { ApiFormBase } from "./ApiFormBase";
 import { parseVcf, VCardContact } from "@/lib/vcard";
+import { parseCsv, parseExcel } from "@/lib/importers";
 
 interface BulkSendTextFormProps {
   config: { baseUrl: string; instance: string; apiKey: string };
@@ -37,9 +38,25 @@ export const BulkSendTextForm = ({ config }: BulkSendTextFormProps) => {
     const f = e.target.files?.[0];
     if (!f) return;
     setFileName(f.name);
+    const ext = (f.name.split(".").pop() || "").toLowerCase();
+    if (ext === "vcf") {
+      const text = await f.text();
+      setContacts(parseVcf(text));
+      return;
+    }
+    if (ext === "csv") {
+      const text = await f.text();
+      setContacts(parseCsv(text));
+      return;
+    }
+    if (ext === "xlsx" || ext === "xls") {
+      const buf = await f.arrayBuffer();
+      const contacts = await parseExcel(buf);
+      setContacts(contacts);
+      return;
+    }
     const text = await f.text();
-    const parsed = parseVcf(text);
-    setContacts(parsed);
+    setContacts(parseVcf(text));
   };
 
   const toggleOne = (num: string, checked: boolean) => {
@@ -91,8 +108,8 @@ export const BulkSendTextForm = ({ config }: BulkSendTextFormProps) => {
     >
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="vcf">VCF File</Label>
-          <Input id="vcf" type="file" accept=".vcf,text/vcard" onChange={onFileChange} />
+          <Label htmlFor="vcf">(supported files csv, vcf, xlxs)</Label>
+          <Input id="vcf" type="file" accept=".vcf,.csv,.xlsx,.xls,text/vcard,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={onFileChange} />
         </div>
 
         <div className="space-y-2">

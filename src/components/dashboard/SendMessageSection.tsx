@@ -31,7 +31,7 @@ export const SendMessageSection = ({ config }: SendMessageSectionProps) => {
       <Tabs defaultValue="text" className="w-full">
         <TabsList className="grid w-full grid-cols-5 lg:grid-cols-11">
           <TabsTrigger value="text">Text</TabsTrigger>
-          <TabsTrigger value="bulk-text">VCF Text (Bulk Messages) </TabsTrigger>
+          <TabsTrigger value="bulk-text">Bulk Messages </TabsTrigger>
           <TabsTrigger value="media">Media</TabsTrigger>
           <TabsTrigger value="location">Location</TabsTrigger>
           <TabsTrigger value="contact">Contact</TabsTrigger>
