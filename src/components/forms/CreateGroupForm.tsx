@@ -34,10 +34,10 @@ const normalizePhoneImported = (tel: string) => {
   );
 
   const handleSubmit = async () => {
-    const participantArray = participants
+    const participantArray =participants.length>0? participants
       .split(/[\n,;]+/)
       .map((p) => normalizePhoneImported(p.trim()))
-      .filter(Boolean);
+      .filter(Boolean):[]
       const selectedNumbersArray =  selectedNumbers.map((p) => normalizePhoneImported(p.trim()))
     const union = Array.from(new Set([...participantArray, ...selectedNumbersArray]));
 
